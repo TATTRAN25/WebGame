@@ -1,0 +1,46 @@
+{% extends 'Home/base.html' %} 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create</title>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" />
+  </head>
+  <body>
+    {% block body_block %} 
+    {% if messages %}
+    <div class="alert alert-info" role="alert">
+      {% for message in messages %} {{ message }}<br />
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="container">
+      {% if form.instance.pk %}
+      <h1>Update a Game</h1>
+      {% else %}
+      <h1>Create a New Game</h1>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.media }}
+        {{ form.as_p }}
+        <input type="submit" value="Save" class="btn btn-success">
+        {% if form.errors %}
+        <div class="error">Please correct the errors above.</div>
+        {% endif %}
+      </form>
+    </div>
+    {% endblock %}
+  </body>
+</html>

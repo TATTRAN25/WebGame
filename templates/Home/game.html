@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Lugx Gaming - Game Page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'css/fontawesome.css' %}">
+  <link rel="stylesheet" href="{% static 'css/templatemo-lugx-gaming.css' %}">
+  <link rel="stylesheet" href="{% static 'css/owl.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+  <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+<body>
+
+  <!-- ***** Header Area Start ***** -->
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <a href="{% url 'Home:index' %}" class="logo">
+              <img src="{% static 'images/logo.png' %}" alt="" style="width: 158px;">
+            </a>
+            <ul class="nav">
+              <li><a href="{% url 'Home:index' %}">Home</a></li>
+              <li><a href="{% url 'Home:game' %}" class="active">Our Game</a></li>
+              <li><a href="{% url 'Home:contact' %}">Contact Us</a></li>
+              {% if user.is_authenticated %}
+              {% if user.is_superuser %}
+                <li style="color: white; font-weight: bold;"><a href="{% url 'Home:user_profile' user.id %}" style="text-decoration: none; font-weight: bold;">Admin: {{ user.username }}</a></li> 
+              {% else %}
+              <li style="color: white; font-weight: bold;"><a href="{% url 'Home:user_profile' user.id %}" style="text-decoration: none; font-weight: bold;">User: {{ user.username }}</a></li>
+              {% endif %}
+              <li><a href="{% url 'Home:logout' %}">Logout</a></li>
+              {% else %}
+              <li style="color: white; font-weight: bold;">Guest</li>
+              <li><a href="{% url 'Home:user_login' %}">Sign In</a></li>
+              {% endif %}
+            </ul>
+            <a class='menu-trigger'>
+              <span>Menu</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+
+  <div class="page-heading header-text">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h3>Our Game</h3>
+          <span class="breadcrumb" style="background-color: transparent;"><a href="{% url 'ProjectWebGame:index' %}">Home</a> > Our Game</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thanh tìm kiếm -->
+  <div class="container my-4">
+    <div class="game-filter">
+        <div class="search-bar">
+            <form method="GET" action="{% url 'Home:game' %}" style="display: flex; width: 100%;" onsubmit="saveScrollPosition(event)">
+                <input type="text" name="search" placeholder="Tìm kiếm game..." value="{{ search_query }}">
+                <button type="submit">Tìm kiếm</button>
+            </form>
+        </div>
+
+        <div class="filter-options">
+          <form method="GET" action="{% url 'Home:game' %}" style="display: flex; width: 100%;" onsubmit="saveScrollPosition(event)">
+                <select id="sort" name="sort">
+                    <option value="">--Chọn tiêu chí--</option>
+                    <option value="high_rating" {% if sort_option == 'high_rating' %}selected{% endif %}>Đánh giá cao nhất</option>
+                    <option value="low_rating" {% if sort_option == 'low_rating' %}selected{% endif %}>Đánh giá thấp nhất</option>
+                    <option value="most_comments" {% if sort_option == 'most_comments' %}selected{% endif %}>Bình luận nhiều nhất</option>
+                    <option value="least_comments" {% if sort_option == 'least_comments' %}selected{% endif %}>Bình luận ít nhất</option>
+                    <option value="latest" {% if sort_option == 'latest' %}selected{% endif %}>Game mới nhất</option>
+                    <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Game cũ nhất</option>
+                </select>
+                <button type="submit" class="apply-filters">Áp dụng bộ lọc</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+  <div class="section trending">
+    <div class="container">
+        <ul class="trending-filter">
+            <li><a class="{% if not category_id %}is_active{% endif %}" href="{% url 'Home:game' %}?search={{ search_query }}" data-filter="*" onclick="saveScrollPosition(event)">Show All</a></li>
+            {% for category in categories %}
+            <li><a class="{% if category_id == category.id|stringformat:'i' %}is_active{% endif %}" href="{% url 'Home:game' %}?category={{ category.id }}&search={{ search_query }}" data-filter=".{{ category.slug }}" onclick="saveScrollPosition(event)">{{ category.name }}</a></li>
+            {% endfor %}
+        </ul>
+        
+        <div class="row trending-box">
+          {% for game in page_obj %}
+          {% if game.is_published %}
+          <div class="col-lg-3 col-md-6 align-self-center mb-30 trending-items">
+              <div class="item">
+                  <div class="thumb" style="width: 100%; overflow: hidden; height: 200px;">
+                    <a href="{% url 'Home:productDetails' game.id %}">
+                        {% if game.image %}
+                        <img src="{{ game.image.url }}" alt="{{ game.name }}" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        <img src="{% static 'images/default.jpg' %}" alt="No image available" 
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                    </a>
+                  </div>
+                  <div class="down-content">
+                      <span class="category">{{ game.category.name }}</span>
+                      <p>Release Date: {{ game.release_date }}</p>
+                      <p>Average Rating: {{ game.avg_rating|default:"No ratings yet!" }}</p>
+                      <h4>{{ game.name }}</h4>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
+          {% empty %}
+          <p>No games found.</p>
+          {% endfor %}
+      </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <ul class="pagination">
+              {% if page_obj.has_previous %}
+              <li><a href="?page=1&search={{ search_query }}&category={{ category_id }}&developer={{ developer_id }}&sort={{ sort_option }}">&lt;&lt;</a></li>
+              <li><a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&category={{ category_id }}&developer={{ developer_id }}&sort={{ sort_option }}">&lt;</a></li>
+              {% endif %}
+              {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+              <li><a class="is_active" href="#">{{ num }}</a></li>
+              {% else %}
+              <li><a href="?page={{ num }}&search={{ search_query }}&category={{ category_id }}&developer={{ developer_id }}&sort={{ sort_option }}">{{ num }}</a></li>
+              {% endif %}
+              {% endfor %}
+              {% if page_obj.has_next %}
+              <li><a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&category={{ category_id }}&developer={{ developer_id }}&sort={{ sort_option }}">&gt;</a></li>
+              <li><a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}&category={{ category_id }}&developer={{ developer_id }}&sort={{ sort_option }}">&gt;&gt;</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <footer>
+    <div class="container">
+      <div class="col-lg-12">
+        <p>Copyright © 2048 LUGX Gaming Company. All rights reserved. &nbsp;&nbsp; <a rel="nofollow" href="https://templatemo.com" target="_blank">Design: Stole By Charizard</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Thêm sự kiện click cho từng liên kết phân trang
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', saveScrollPosition);
+    });
+
+    // Thêm sự kiện submit cho các form tìm kiếm
+    document.querySelectorAll('.game-filter form').forEach(form => {
+        form.addEventListener('submit', saveScrollPosition);
+    });
+
+    function saveScrollPosition(event) {
+        event.preventDefault(); // Ngăn chặn hành động mặc định
+        sessionStorage.setItem('scrollPosition', window.pageYOffset); // Lưu vị trí cuộn
+    
+        // Kiểm tra xem có phải là form hay không
+        if (event.target.tagName === 'A') {
+            const targetUrl = event.target.href; // Lấy URL từ liên kết
+            window.location.href = targetUrl; // Chuyển hướng đến URL
+        } else {
+            // Nếu là form, lấy URL từ thuộc tính action
+            const form = event.target;
+            const params = new URLSearchParams(new FormData(form));
+            const url = form.action + '?' + params.toString();
+            window.location.href = url; // Chuyển hướng đến URL
+        }
+    }
+
+    // Khôi phục vị trí cuộn khi trang được tải lại
+    window.addEventListener('load', function() {
+        const scrollPosition = sessionStorage.getItem('scrollPosition');
+        if (scrollPosition) {
+            window.scrollTo(0, scrollPosition); // Cuộn đến vị trí đã lưu
+            sessionStorage.removeItem('scrollPosition'); // Xóa vị trí cuộn đã lưu
+        }
+    });
+    </script>
+</body>
+
+</html>
